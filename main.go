@@ -19,12 +19,12 @@ const (
 	connType  = "tcp"
 	display_x = 60
 	display_y = 33
+	valueMax  = 7
+	debug     = false
 )
 
 /* global variable declaration */
-var matrix [display_x][display_y][3]uint8
-var matrix_b [display_x][display_y][3]byte
-var matrix_s [display_x][display_y]string
+var matrix [display_x][display_y]string
 
 func main() {
 
@@ -33,13 +33,8 @@ func main() {
 
 	for i := 0; i < display_x; i++ {
 		for j := 0; j < display_y; j++ {
-			matrix[i][j][0] = 0
-			matrix[i][j][1] = 0
-			matrix[i][j][2] = 0
-			matrix_b[i][j][0] = 0
-			matrix_b[i][j][1] = 0
-			matrix_b[i][j][2] = 0
-			matrix_s[i][j] = "000000"
+
+			matrix[i][j] = "000000"
 		}
 	}
 
@@ -73,32 +68,40 @@ func main() {
 
 // handleConnection handles logic for a single connection request.
 func handleConnection(conn net.Conn) {
+
+	bufferOut := []byte("unkown command \n")
+
 	// Buffer client input until a newline.
 	buffer, err := bufio.NewReader(conn).ReadBytes('\n')
 
 	// Close left clients.
 	if err != nil {
-		fmt.Println("Client left.")
 		conn.Close()
 		return
 	}
 
-	//var n int8
-
+	//
 	// Set Pixel
+	//
 	if string(buffer[0:2]) == "SP" {
+
 		xyc := strings.Split(string(buffer[3:]), " ")
-		x := xyc[0]
-		y := xyc[1]
-		colorHex := xyc[2]
 
-		log.Println("SP Data X: ", x)
-		log.Println("SP Data Y: ", y)
-		log.Println("SP Data C: ", colorHex)
+		if len(xyc) < 3 {
+			conn.Write([]byte("Too few arguments."))
+			conn.Close()
+			return
+		}
 
-		//	if len(colorhex) <> 4 then die
+		if debug == true {
+			log.Println("DEBUG: Full IN: ", xyc)
+			log.Println("DEBUG: SP Data X: ", xyc[0])
+			log.Println("DEBUG: SP Data Y: ", xyc[1])
+			log.Println("DEBUG: SP Data C: ", xyc[2])
+		}
 
-		xInt, err := strconv.Atoi(x)
+		// convert x to int
+		xInt, err := strconv.Atoi(xyc[0])
 
 		if err != nil {
 			conn.Write([]byte("Error in X."))
@@ -106,7 +109,20 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 
-		yInt, err := strconv.Atoi(y)
+		if xInt > display_x {
+			conn.Write([]byte("X to big."))
+			conn.Close()
+			return
+		}
+
+		if xInt == 0 {
+			conn.Write([]byte("X to small."))
+			conn.Close()
+			return
+		}
+
+		// convert y to int
+		yInt, err := strconv.Atoi(xyc[1])
 
 		if err != nil {
 			conn.Write([]byte("Error in Y."))
@@ -114,30 +130,43 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 
-		//	matrix_b[xInt][yInt][0] = []byte(r)[0] // use first byte after convert "string" r to byte array
-		matrix_s[xInt][yInt] = colorHex[1:]
-		//		matrix[xInt][yInt][1] = c[3:2]
-		//		matrix[xInt][yInt][2] = c[5:2]
+		if yInt > display_y {
+			conn.Write([]byte("Y to big."))
+			conn.Close()
+			return
+		}
 
-		log.Println("SP Data: ", xyc)
+		if yInt == 0 {
+			conn.Write([]byte("Y to small."))
+			conn.Close()
+			return
+		}
+
+		// set 3. value to display matrix
+		matrix[xInt-1][yInt-1] = xyc[2][1:]
+		log.Println("")
+
+		bufferOut = []byte("OK, " + string(buffer[3:]) + "\n")
 	}
 
 	// Get Pixel
 	if string(buffer[0:2]) == "GP" {
 		//xyc := strings.Split(string(buffer[2:]), " ")
-		log.Println("#", matrix)
+		log.Print(".", matrix)
 	}
 
 	// Get Matrix
 	if string(buffer[0:2]) == "GM" {
-
+		log.Print("#", matrix)
 	}
 
+	//
+
 	// Print response message, stripping newline character.
-	log.Println("Client message:", string(buffer[:len(buffer)-1]))
+	// log.Println("Client message:", string(buffer[:len(buffer)-1]))
 
 	// Send response message to the client.
-	conn.Write(buffer)
+	conn.Write(bufferOut)
 
 	// Restart the process.
 	handleConnection(conn)
