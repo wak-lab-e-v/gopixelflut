@@ -141,9 +141,17 @@ func handleConnection(conn net.Conn) {
 			conn.Close()
 			return
 		}
+		log.Println(xyc[2])
+		xyc[2] = strings.TrimRight(xyc[2], "\r\n")
+		log.Println(xyc[2])
+		if len(xyc[2]) != 7 {
+			conn.Write([]byte("Value size missmatch."))
+			conn.Close()
+			return
+		}
 
 		// set 3. value to display matrix
-		matrix[xInt-1][yInt-1] = xyc[2][1:]
+		matrix[xInt-1][yInt-1] = xyc[2][1:7]
 		log.Println("")
 
 		bufferOut = []byte("OK, " + string(buffer[3:]) + "\n")
@@ -151,8 +159,62 @@ func handleConnection(conn net.Conn) {
 
 	// Get Pixel
 	if string(buffer[0:2]) == "GP" {
-		//xyc := strings.Split(string(buffer[2:]), " ")
-		log.Print(".", matrix)
+
+		xy := strings.Split(string(buffer[3:]), " ")
+
+		if len(xy) < 2 {
+			conn.Write([]byte("Too few arguments."))
+			conn.Close()
+			return
+		}
+
+		// convert x to int
+		xInt, err := strconv.Atoi(xy[0])
+
+		if err != nil {
+			conn.Write([]byte("Error in X."))
+			conn.Close()
+			return
+		}
+
+		if xInt > display_x {
+			conn.Write([]byte("X to big."))
+			conn.Close()
+			return
+		}
+
+		if xInt == 0 {
+			conn.Write([]byte("X to small."))
+			conn.Close()
+			return
+		}
+
+		xy[1] = strings.TrimRight(xy[1], "\r\n")
+		// convert y to int
+		yInt, err := strconv.Atoi(xy[1])
+
+		if err != nil {
+			e := fmt.Errorf("%v", err)
+			conn.Write([]byte("Error in Y." + string(e.Error())))
+			conn.Close()
+			return
+		}
+
+		if yInt > display_y {
+			conn.Write([]byte("Y to big."))
+			conn.Close()
+			return
+		}
+
+		if yInt == 0 {
+			conn.Write([]byte("Y to small."))
+			conn.Close()
+			return
+		}
+
+		bufferOut = []byte("#" + matrix[xInt-1][yInt-1] + "\r\n")
+
+		log.Print(".")
 	}
 
 	// Get Matrix
