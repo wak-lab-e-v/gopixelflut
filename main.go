@@ -39,7 +39,7 @@ func main() {
 			matrix_b[i][j][0] = 0
 			matrix_b[i][j][1] = 0
 			matrix_b[i][j][2] = 0
-			matrix_s[i][j] = ""
+			matrix_s[i][j] = "000000"
 		}
 	}
 
@@ -99,7 +99,6 @@ func handleConnection(conn net.Conn) {
 		//	if len(colorhex) <> 4 then die
 
 		xInt, err := strconv.Atoi(x)
-		xI8 := uint8(xInt)
 
 		if err != nil {
 			conn.Write([]byte("Error in X."))
@@ -108,7 +107,6 @@ func handleConnection(conn net.Conn) {
 		}
 
 		yInt, err := strconv.Atoi(y)
-		yI8 := uint8(yInt)
 
 		if err != nil {
 			conn.Write([]byte("Error in Y."))
@@ -116,8 +114,8 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 
-		matrix_b[xInt][yInt][0] = []byte(r)[0] // use first byte after convert "string" r to byte array
-		matrix_s[xInt][yInt] = r[1:]
+		//	matrix_b[xInt][yInt][0] = []byte(r)[0] // use first byte after convert "string" r to byte array
+		matrix_s[xInt][yInt] = colorHex[1:]
 		//		matrix[xInt][yInt][1] = c[3:2]
 		//		matrix[xInt][yInt][2] = c[5:2]
 
