@@ -56,6 +56,7 @@ func main() {
 			fmt.Println("Error connecting:", err.Error())
 			return
 		}
+
 		fmt.Println("Client connected.")
 
 		// Print client connection address.
@@ -152,7 +153,7 @@ func handleConnection(conn net.Conn) {
 
 		// set 3. value to display matrix
 		matrix[xInt-1][yInt-1] = xyc[2][1:7]
-		log.Println("")
+		log.Println("SP from " + conn.RemoteAddr().String())
 
 		bufferOut = []byte("OK, " + string(buffer[3:]) + "\n")
 	}
@@ -214,15 +215,21 @@ func handleConnection(conn net.Conn) {
 
 		bufferOut = []byte("#" + matrix[xInt-1][yInt-1] + "\r\n")
 
-		log.Print(".")
+		log.Print("GP from " + conn.RemoteAddr().String())
 	}
 
 	// Get Matrix
 	if string(buffer[0:2]) == "GM" {
-		log.Print("#", matrix)
-	}
 
-	//
+		for i := 0; i < display_x; i++ {
+			for j := 0; j < display_y; j++ {
+				conn.Write([]byte(matrix[i][j]))
+			}
+		}
+
+		bufferOut = []byte("\r\n")
+		log.Println("GM from " + conn.RemoteAddr().String())
+	}
 
 	// Print response message, stripping newline character.
 	// log.Println("Client message:", string(buffer[:len(buffer)-1]))
