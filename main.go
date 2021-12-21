@@ -142,9 +142,9 @@ func handleConnection(conn net.Conn) {
 			conn.Close()
 			return
 		}
-		log.Println(xyc[2])
+
 		xyc[2] = strings.TrimRight(xyc[2], "\r\n")
-		log.Println(xyc[2])
+
 		if len(xyc[2]) != 7 {
 			conn.Write([]byte("Value size missmatch."))
 			conn.Close()
@@ -153,7 +153,7 @@ func handleConnection(conn net.Conn) {
 
 		// set 3. value to display matrix
 		matrix[xInt-1][yInt-1] = xyc[2][1:7]
-		log.Println("SP from " + conn.RemoteAddr().String())
+		log.Println("SP from " + xyc[0] + "x" + xyc[1] + " to " + xyc[2] + " from " + conn.RemoteAddr().String())
 
 		bufferOut = []byte("OK, " + string(buffer[3:]) + "\n")
 	}
@@ -221,8 +221,8 @@ func handleConnection(conn net.Conn) {
 	// Get Matrix
 	if string(buffer[0:2]) == "GM" {
 
-		for i := 0; i < display_x; i++ {
-			for j := 0; j < display_y; j++ {
+		for j := 0; j < display_y; j++ {
+			for i := 0; i < display_x; i++ {
 				conn.Write([]byte(matrix[i][j]))
 			}
 		}
