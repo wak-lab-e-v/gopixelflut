@@ -4,6 +4,7 @@ package main
 
 import (
 	"bufio"
+	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
@@ -25,6 +26,7 @@ const (
 
 /* global variable declaration */
 var matrix [display_x][display_y]string
+var matrix_rgb [display_x][display_y][3]byte
 
 func main() {
 
@@ -35,6 +37,10 @@ func main() {
 		for j := 0; j < display_y; j++ {
 
 			matrix[i][j] = "000000"
+
+			matrix_rgb[i][j][0] = 0
+			matrix_rgb[i][j][1] = 0
+			matrix_rgb[i][j][2] = 0
 		}
 	}
 
@@ -153,6 +159,8 @@ func handleConnection(conn net.Conn) {
 
 		// set 3. value to display matrix
 		matrix[xInt-1][yInt-1] = xyc[2][1:7]
+		matrix_rgb[xInt-1][yInt-1][0] = []byte(xyc[2][1:2])[0]
+		// hex.Decode()
 		log.Println("SP from " + xyc[0] + "x" + xyc[1] + " to " + xyc[2] + " from " + conn.RemoteAddr().String())
 
 		bufferOut = []byte("OK, " + string(buffer[3:]) + "\n")
