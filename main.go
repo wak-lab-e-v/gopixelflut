@@ -1,10 +1,11 @@
-// Package main is the entry-point for the go-sockets server sub-project.
-// The go-sockets project is available under the GPL-3.0 License in LICENSE.
+// based on https://github.com/Alice-Williams-Tech/go-sockets
+// This and the go-sockets project is available under the GPL-3.0 License in LICENSE.
+//
 package main
 
 import (
 	"bufio"
-	"encoding/hex"
+	//	"encoding/hex"
 	"fmt"
 	"log"
 	"net"
@@ -159,9 +160,10 @@ func handleConnection(conn net.Conn) {
 
 		// set 3. value to display matrix
 		matrix[xInt-1][yInt-1] = xyc[2][1:7]
+
 		matrix_rgb[xInt-1][yInt-1][0] = []byte(xyc[2][1:2])[0]
 		// hex.Decode()
-		log.Println("SP from " + xyc[0] + "x" + xyc[1] + " to " + xyc[2] + " from " + conn.RemoteAddr().String())
+		log.Println("SP x:" + xyc[0] + " y:" + xyc[1] + " to " + xyc[2] + " from " + conn.RemoteAddr().String())
 
 		bufferOut = []byte("OK, " + string(buffer[3:]) + "\n")
 	}
@@ -226,16 +228,27 @@ func handleConnection(conn net.Conn) {
 		log.Print("GP from " + conn.RemoteAddr().String())
 	}
 
+	var checksum uint64 = 0
+	var check int = 0
+
 	// Get Matrix
 	if string(buffer[0:2]) == "GM" {
 
 		for j := 0; j < display_y; j++ {
 			for i := 0; i < display_x; i++ {
 				conn.Write([]byte(matrix[i][j]))
+				check, err = strconv.Atoi(matrix[i][j])
+				if err == nil {
+					checksum = checksum + uint64(check)
+				}
+
 			}
 		}
 
+		check_string := strconv.FormatUint(checksum, 10)
+		conn.Write([]byte("\r\n#" + check_string))
 		bufferOut = []byte("\r\n")
+
 		log.Println("GM from " + conn.RemoteAddr().String())
 	}
 
