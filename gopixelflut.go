@@ -74,10 +74,9 @@ func handleConnection(conn net.Conn) {
 	bufOne := make([]byte, 1)
 
 	// conn.SetReadDeadline(5) // read timeout
+	command := ""
 
 	for {
-
-		command := ""
 
 		n, err := conn.Read(bufOne)
 
