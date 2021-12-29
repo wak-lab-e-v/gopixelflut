@@ -97,14 +97,14 @@ func handleConnection(conn net.Conn) {
 			// ch := string(bufOne)
 
 			if ch == 10 { // ende vom eingehenden command
-				log.Println(command)
+				log.Println("10:" + command)
 				go handleCommand(command, conn)
 				command = ""
 
 			} else {
 
 				command = command + string(bufOne)
-
+				log.Println(command)
 			}
 		} else {
 			log.Println("conn read has 0 bytes")
