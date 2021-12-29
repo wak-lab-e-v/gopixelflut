@@ -103,14 +103,14 @@ func handleCommand(Command string, conn net.Conn) {
 		return
 	}
 
-	CMD := CmdString[0:2]
+	CMD := Command[0:2]
 
 	switch CMD {
 	case "SP":
 		if len(Command) < 5 {
 			return
 		}
-		ARG := CmdString[3:]
+		ARG := Command[3:]
 		xyc := strings.Split(ARG, " ")
 		if len(xyc) < 3 {
 			conn.Write([]byte("Too few arguments."))
@@ -178,7 +178,7 @@ func handleCommand(Command string, conn net.Conn) {
 		if len(Command) < 5 {
 			return
 		}
-		ARG := CmdString[3:]
+		ARG := Command[3:]
 		xy := strings.Split(ARG, " ")
 
 		if len(xy) < 2 {
