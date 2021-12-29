@@ -241,8 +241,10 @@ func handleCommand(Command string, conn net.Conn) {
 		return
 
 	default:
-		conn.Write([]byte("unkown command \n"))
-		log.Println(CMD)
+		if []byte(CMD)[0] > 0 {
+			conn.Write([]byte("unkown command \n"))
+		}
+		//log.Println([]byte(CMD))
 		return
 	}
 
