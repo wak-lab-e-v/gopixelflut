@@ -97,18 +97,21 @@ func handleConnection(conn net.Conn) {
 }
 
 func handleCommand(Command []byte, conn net.Conn) {
-	log.Println(string(Command))
+	//log.Println(string(Command))
 
-	if len(Command) < 10 {
+	if len(Command) < 2 {
 		return
 	}
 
 	CmdString := string(Command)
 	CMD := CmdString[0:2]
-	ARG := CmdString[3:]
 
 	switch CMD {
 	case "SP":
+		if len(Command) < 5 {
+			return
+		}
+		ARG := CmdString[3:]
 		xyc := strings.Split(ARG, " ")
 		if len(xyc) < 3 {
 			conn.Write([]byte("Too few arguments."))
@@ -173,6 +176,10 @@ func handleCommand(Command []byte, conn net.Conn) {
 
 	case "GP":
 		// Get Pixel
+		if len(Command) < 5 {
+			return
+		}
+		ARG := CmdString[3:]
 		xy := strings.Split(ARG, " ")
 
 		if len(xy) < 2 {
