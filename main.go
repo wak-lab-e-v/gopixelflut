@@ -69,7 +69,7 @@ func main() {
 
 // handleConnection handles logic for a single connection request.
 func handleConnection(conn net.Conn) {
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, 10240)
 
 	for {
 		// Buffer client input until a newline.
