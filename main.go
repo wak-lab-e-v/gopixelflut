@@ -70,7 +70,7 @@ func main() {
 // handleConnection handles logic for a single connection request.
 func handleConnection(conn net.Conn) {
 	buffer := make([]byte, 10240)
-	broken := ""
+	//broken := ""
 	commad := ""
 
 	for {
@@ -101,19 +101,19 @@ func handleConnection(conn net.Conn) {
 		for i := 0; i < Count; i++ {
 			//log.Println([]byte(buffersplit[i]))
 			if (len(buffersplit[i]) > 0) && (buffersplit[i][0] != 0) {
-				if len(broken) > 0 {
-					commad = broken + buffersplit[i]
-					broken = ""
-				} else {
-					commad = buffersplit[i]
-				}
+				//			if len(broken) > 0 {
+				//				commad = broken + buffersplit[i]
+				//				broken = ""
+				//			} else {
+				commad = buffersplit[i]
+				//			}
 				go handleCommand(commad, conn)
 			}
 		}
-		if (Count > 0) && (buffersplit[Count-1][0] != 0) {
-			broken = buffersplit[Count-1][:len(buffersplit[Count-1])]
-			log.Println(broken)
-		}
+		//if (Count > 0) && (buffersplit[Count-1][0] != 0) {
+		//	broken = buffersplit[Count-1][:len(buffersplit[Count-1])]
+		//	log.Println(broken)
+		//}
 	}
 }
 
