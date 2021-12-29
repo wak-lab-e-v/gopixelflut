@@ -74,13 +74,12 @@ func handleConnection(conn net.Conn) {
 	bufOne := make([]byte, 1)
 
 	// conn.SetReadDeadline(5) // read timeout
+
 	command := ""
 
 	for {
 
 		n, err := conn.Read(bufOne)
-
-		//buffersplit := strings.Split(string(buffer), "\n")
 
 		if err != nil {
 			// possible reason: read timeout
@@ -93,27 +92,20 @@ func handleConnection(conn net.Conn) {
 
 			ch := int(bufOne[0])
 
-			// ch := string(bufOne)
-
 			if ch == 10 { // ende vom eingehenden command
-				log.Println("10:" + command)
 				go handleCommand(command, conn)
 				command = ""
-
 			} else {
-				log.Println("B:" + command)
 				command = command + string(bufOne)
-				log.Println("A:" + command)
 			}
 		} else {
-			log.Println("conn read has 0 bytes")
+			log.Println("conn read (n) has 0 bytes")
 		}
 
 	}
 }
 
 func handleCommand(Command string, conn net.Conn) {
-	//log.Println(string(Command))
 
 	if len(Command) < 2 {
 		return
