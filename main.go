@@ -91,19 +91,18 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 		for i := 0; i < len(buffersplit); i++ {
-			go handleCommand([]byte(buffersplit[i]), conn)
+			go handleCommand(buffersplit[i], conn)
 		}
 	}
 }
 
-func handleCommand(Command []byte, conn net.Conn) {
+func handleCommand(Command string, conn net.Conn) {
 	//log.Println(string(Command))
 
 	if len(Command) < 2 {
 		return
 	}
 
-	CmdString := string(Command)
 	CMD := CmdString[0:2]
 
 	switch CMD {
