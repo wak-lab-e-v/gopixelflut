@@ -77,7 +77,7 @@ func handleConnection(conn net.Conn) {
 
 		_, err := conn.Read(buffer)
 		buffersplit := strings.Split(string(buffer), "\n")
-		log.Println(string(buffer))
+		//log.Println(string(buffer))
 		//bufferstring := string(buffer)
 		//log.Println(bufLen)
 		//log.Println(bufferstring)
@@ -98,7 +98,7 @@ func handleConnection(conn net.Conn) {
 }
 
 func handleCommand(Command string, conn net.Conn) {
-	log.Println(string(Command))
+	//log.Println(string(Command))
 
 	if len(Command) < 2 {
 		return
@@ -242,6 +242,7 @@ func handleCommand(Command string, conn net.Conn) {
 
 	default:
 		conn.Write([]byte("unkown command \n"))
+		log.Println(CMD)
 		return
 	}
 
