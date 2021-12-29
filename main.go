@@ -77,6 +77,7 @@ func handleConnection(conn net.Conn) {
 
 		_, err := conn.Read(buffer)
 		buffersplit := strings.Split(string(buffer), "\n")
+		log.Println(string(buffer))
 		//bufferstring := string(buffer)
 		//log.Println(bufLen)
 		//log.Println(bufferstring)
@@ -225,7 +226,7 @@ func handleCommand(Command string, conn net.Conn) {
 		}
 
 		conn.Write([]byte("#" + matrix[xInt-1][yInt-1] + "\r\n"))
-
+		return
 		//log.Print("GP from " + conn.RemoteAddr().String())
 	case "GM":
 		// Get Matrix
