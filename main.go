@@ -94,7 +94,7 @@ func handleConnection(conn net.Conn) {
 }
 
 func handleCommand(Command []byte, conn net.Conn) {
-	log.Println(string(Command))
+	//log.Println(string(Command))
 
 	if len(Command) < 3 {
 		return
