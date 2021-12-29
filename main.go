@@ -217,7 +217,7 @@ func handleCommand(Command []byte, conn net.Conn) {
 
 		conn.Write([]byte("#" + matrix[xInt-1][yInt-1] + "\r\n"))
 
-		log.Print("GP from " + conn.RemoteAddr().String())
+		//log.Print("GP from " + conn.RemoteAddr().String())
 	case "GM":
 		// Get Matrix
 		for j := 0; j < display_y; j++ {
@@ -227,7 +227,7 @@ func handleCommand(Command []byte, conn net.Conn) {
 		}
 
 		conn.Write([]byte("\r\n"))
-		log.Println("GM from " + conn.RemoteAddr().String())
+		//log.Println("GM from " + conn.RemoteAddr().String())
 		return
 
 	default:
