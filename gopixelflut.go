@@ -102,9 +102,9 @@ func handleConnection(conn net.Conn) {
 				command = ""
 
 			} else {
-
+				log.Println("B:" + command)
 				command = command + string(bufOne)
-				log.Println(command)
+				log.Println("A:" + command)
 			}
 		} else {
 			log.Println("conn read has 0 bytes")
