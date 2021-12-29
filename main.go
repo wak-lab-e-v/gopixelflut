@@ -91,8 +91,12 @@ func handleConnection(conn net.Conn) {
 			conn.Close()
 			return
 		}
+		log.Println(len(buffersplit))
 		for i := 0; i < len(buffersplit); i++ {
-			go handleCommand(buffersplit[i], conn)
+			//log.Println([]byte(buffersplit[i]))
+			if (len(buffersplit[i]) > 0) && (buffersplit[i][0] != 0) {
+				go handleCommand(buffersplit[i], conn)
+			}
 		}
 	}
 }
