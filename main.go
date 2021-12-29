@@ -3,7 +3,7 @@
 package main
 
 import (
-	"bufio"
+	//	"bufio"
 	"fmt"
 	"log"
 	"net"
@@ -69,13 +69,14 @@ func main() {
 
 // handleConnection handles logic for a single connection request.
 func handleConnection(conn net.Conn) {
-	//buffer := make([]byte, 1024)
+	buffer := make([]byte, 1024)
 
 	for {
 		// Buffer client input until a newline.
-		buffer, err := bufio.NewReader(conn).ReadBytes('\n')
+		//buffer, err := bufio.NewReader(conn).ReadBytes('\n')
 
-		//bufLen , err := conn.Read(buffer)
+		CmdCount, err := conn.Read(buffer)
+		buffersplit := strings.Split(string(buffer), "\n")
 		//bufferstring := string(buffer)
 		//log.Println(bufLen)
 		//log.Println(bufferstring)
@@ -89,7 +90,9 @@ func handleConnection(conn net.Conn) {
 			conn.Close()
 			return
 		}
-		go handleCommand(buffer, conn)
+		for i := 0; i < CmdCount; i++ {
+			go handleCommand([]byte(buffersplit[i]), conn)
+		}
 	}
 }
 
