@@ -85,6 +85,7 @@ func handleConnection(conn net.Conn) {
 			// possible reason: read timeout
 			log.Println("error in connection - closed")
 			conn.Close()
+
 			return
 		}
 
@@ -114,7 +115,7 @@ func handleCommand(Command string, conn net.Conn) {
 	CMD := Command[0:2]
 
 	switch CMD {
-	case "SP":
+	case "PX":
 		if len(Command) < 5 {
 			return
 		}
@@ -179,6 +180,7 @@ func handleCommand(Command string, conn net.Conn) {
 		//              log.Println("SP from " + xyc[0] + "x" + xyc[1] + " to " + xyc[2] + " from " + conn.RemoteAddr().String())
 
 		conn.Write([]byte("OK\n"))
+
 		return
 
 	case "GP":
@@ -233,6 +235,7 @@ func handleCommand(Command string, conn net.Conn) {
 		}
 
 		conn.Write([]byte("#" + matrix[xInt-1][yInt-1] + "\r\n"))
+
 		return
 		//log.Print("GP from " + conn.RemoteAddr().String())
 	case "GM":
