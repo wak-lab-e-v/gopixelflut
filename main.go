@@ -92,8 +92,9 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 		//log.Println(len(buffersplit))
+		log.Println(buffer)
 		for i := 0; i < len(buffersplit); i++ {
-			//log.Println([]byte(buffersplit[i]))
+			log.Println([]byte(buffersplit[i]))
 			if (len(buffersplit[i]) > 0) && (buffersplit[i][0] != 0) {
 				go handleCommand(buffersplit[i], conn)
 			}
@@ -102,7 +103,7 @@ func handleConnection(conn net.Conn) {
 }
 
 func handleCommand(Command string, conn net.Conn) {
-	log.Println(string(Command))
+	//log.Println(string(Command))
 
 	if len(Command) < 2 {
 		return
