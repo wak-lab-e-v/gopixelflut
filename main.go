@@ -75,7 +75,7 @@ func handleConnection(conn net.Conn) {
 		// Buffer client input until a newline.
 		//buffer, err := bufio.NewReader(conn).ReadBytes('\n')
 
-		CmdCount, err := conn.Read(buffer)
+		_, err := conn.Read(buffer)
 		buffersplit := strings.Split(string(buffer), "\n")
 		//bufferstring := string(buffer)
 		//log.Println(bufLen)
@@ -90,7 +90,7 @@ func handleConnection(conn net.Conn) {
 			conn.Close()
 			return
 		}
-		for i := 0; i < CmdCount; i++ {
+		for i := 0; i < len(buffersplit); i++ {
 			go handleCommand([]byte(buffersplit[i]), conn)
 		}
 	}
