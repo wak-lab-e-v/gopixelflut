@@ -80,13 +80,16 @@ func handleConnection(conn net.Conn) {
 		command := ""
 
 		n, err := conn.Read(bufOne)
+
 		//buffersplit := strings.Split(string(buffer), "\n")
 
 		if err != nil {
 			// possible reason: read timeout
+			log.Println("error in connection - closed")
 			conn.Close()
 			return
 		}
+
 		if n > 0 {
 
 			ch := int(bufOne[0])
@@ -94,7 +97,7 @@ func handleConnection(conn net.Conn) {
 			// ch := string(bufOne)
 
 			if ch == 10 { // ende vom eingehenden command
-
+				log.Println(command)
 				go handleCommand(command, conn)
 				command = ""
 
@@ -103,6 +106,8 @@ func handleConnection(conn net.Conn) {
 				command = command + string(bufOne)
 
 			}
+		} else {
+			log.Println("conn read has 0 bytes")
 		}
 
 	}
