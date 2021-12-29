@@ -70,6 +70,8 @@ func main() {
 // handleConnection handles logic for a single connection request.
 func handleConnection(conn net.Conn) {
 	buffer := make([]byte, 10240)
+	broken := ""
+	commad := ""
 
 	for {
 		// Buffer client input until a newline.
@@ -77,6 +79,7 @@ func handleConnection(conn net.Conn) {
 
 		_, err := conn.Read(buffer)
 		buffersplit := strings.Split(string(buffer), "\n")
+
 		//log.Println(string(buffer))
 		//bufferstring := string(buffer)
 		//log.Println(bufLen)
@@ -92,12 +95,24 @@ func handleConnection(conn net.Conn) {
 			return
 		}
 		//log.Println(len(buffersplit))
-		log.Println(buffer)
-		for i := 0; i < len(buffersplit); i++ {
-			log.Println([]byte(buffersplit[i]))
+		Count := len(buffersplit)
+
+		//log.Println(buffer)
+		for i := 0; i < Count; i++ {
+			//log.Println([]byte(buffersplit[i]))
 			if (len(buffersplit[i]) > 0) && (buffersplit[i][0] != 0) {
-				go handleCommand(buffersplit[i], conn)
+				if len(broken) > 0 {
+					commad = broken + buffersplit[i]
+					broken = ""
+				} else {
+					commad = buffersplit[i]
+				}
+				go handleCommand(commad, conn)
 			}
+		}
+		if (Count > 0) && (buffersplit[Count-1][0] != 0) {
+			broken = buffersplit[Count-1][:len(buffersplit[Count-1])]
+			log.Println(broken)
 		}
 	}
 }
