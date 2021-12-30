@@ -76,13 +76,13 @@ func main() {
 // handleConnection handles logic for a single connection request.
 func handleConnection(conn net.Conn) {
 
-	defer conn.Close()
 	bufOne := make([]byte, 1)
 	command := ""
 
 	// conn.SetReadDeadline(5) // read timeout
 
 	for {
+		defer conn.Close()
 
 		n, err := conn.Read(bufOne)
 
