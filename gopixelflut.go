@@ -235,6 +235,7 @@ func handleCommand(Command string, conn net.Conn) string {
 
 	case "GM":
 		// Get Matrix
+		log.Print("GM from " + conn.RemoteAddr().String())
 		m := ""
 		for j := 0; j < display_y; j++ {
 			for i := 0; i < display_x; i++ {
