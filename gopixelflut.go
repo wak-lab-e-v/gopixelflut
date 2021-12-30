@@ -101,7 +101,7 @@ func handleConnection(conn net.Conn) {
 
 			if ch == 10 { // ende vom eingehenden command
 				resultString := handleCommand(command, conn)
-				conn.Write([]byte(resultString + "\n"))
+				conn.Write([]byte(resultString + "\r\n"))
 				command = ""
 			} else {
 				command = command + string(bufOne)
@@ -235,13 +235,14 @@ func handleCommand(Command string, conn net.Conn) string {
 
 	case "GM":
 		// Get Matrix
-		log.Print("GM from " + conn.RemoteAddr().String())
+
 		m := ""
 		for j := 0; j < display_y; j++ {
 			for i := 0; i < display_x; i++ {
 				m = m + matrix[i][j]
 			}
 		}
+		log.Print("GM from " + conn.RemoteAddr().String() + " Len " + string(len(m)))
 		return m
 
 	default:
