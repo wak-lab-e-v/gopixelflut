@@ -82,7 +82,7 @@ func handleConnection(conn net.Conn) {
 	// conn.SetReadDeadline(5) // read timeout
 
 	for {
-		defer conn.Close()
+		// defer conn.Close()
 
 		n, err := conn.Read(bufOne)
 
@@ -90,7 +90,7 @@ func handleConnection(conn net.Conn) {
 			// errors.Is()
 			// possible reason: read timeout
 			log.Println("error in connection - closed")
-			// conn.Close()
+			conn.Close()
 
 			return
 		}
