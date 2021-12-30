@@ -26,6 +26,7 @@ const (
 
 /* global variable declaration */
 var matrix [display_x][display_y]string
+var matrix_rgb [display_x][display_y][3]byte
 
 func main() {
 
@@ -36,6 +37,10 @@ func main() {
 		for j := 0; j < display_y; j++ {
 
 			matrix[i][j] = "000000"
+
+			matrix_rgb[i][j][0] = 0
+			matrix_rgb[i][j][1] = 0
+			matrix_rgb[i][j][2] = 0
 		}
 	}
 
@@ -71,20 +76,21 @@ func main() {
 // handleConnection handles logic for a single connection request.
 func handleConnection(conn net.Conn) {
 
+	defer conn.Close()
 	bufOne := make([]byte, 1)
+	command := ""
 
 	// conn.SetReadDeadline(5) // read timeout
-
-	command := ""
 
 	for {
 
 		n, err := conn.Read(bufOne)
 
 		if err != nil {
+			// errors.Is()
 			// possible reason: read timeout
 			log.Println("error in connection - closed")
-			conn.Close()
+			// conn.Close()
 
 			return
 		}
@@ -94,7 +100,8 @@ func handleConnection(conn net.Conn) {
 			ch := int(bufOne[0])
 
 			if ch == 10 { // ende vom eingehenden command
-				go handleCommand(command, conn)
+				resultString := handleCommand(command, conn)
+				conn.Write([]byte(resultString + "\n"))
 				command = ""
 			} else {
 				command = command + string(bufOne)
@@ -106,10 +113,10 @@ func handleConnection(conn net.Conn) {
 	}
 }
 
-func handleCommand(Command string, conn net.Conn) {
+func handleCommand(Command string, conn net.Conn) string {
 
 	if len(Command) < 2 {
-		return
+		return "cmd len to small"
 	}
 
 	CMD := Command[0:2]
@@ -117,150 +124,132 @@ func handleCommand(Command string, conn net.Conn) {
 	switch CMD {
 	case "PX":
 		if len(Command) < 5 {
-			return
+			return "wrong cmd len"
 		}
 		ARG := Command[3:]
 		xyc := strings.Split(ARG, " ")
 		if len(xyc) < 3 {
-			conn.Write([]byte("Too few arguments."))
-			return
+			return "Too few arguments."
 		}
 		if debug == true {
 			log.Println("DEBUG: Full IN: ", xyc)
 			log.Println("DEBUG: SP Data X: ", xyc[0])
 			log.Println("DEBUG: SP Data Y: ", xyc[1])
 			log.Println("DEBUG: SP Data C: ", xyc[2])
-
 		}
 		// convert x to int
 		xInt, err := strconv.Atoi(xyc[0])
 
 		if err != nil {
-			conn.Write([]byte("Error in X."))
-			return
+			return "Error in X."
 		}
 
 		if xInt > display_x {
-			conn.Write([]byte("X to big."))
-			return
+			return "X to big."
 		}
 
 		if xInt == 0 {
-			conn.Write([]byte("X to small."))
-			return
+			return "X to small."
 		}
 
 		// convert y to int
 		yInt, err := strconv.Atoi(xyc[1])
 
 		if err != nil {
-			conn.Write([]byte("Error in Y."))
-			return
+			return "Error in Y."
 		}
 
 		if yInt > display_y {
-			conn.Write([]byte("Y to big."))
-			return
+			return "Y to big."
 		}
 
 		if yInt == 0 {
-			conn.Write([]byte("Y to small."))
-			return
+			return "Y to small."
 		}
 
 		xyc[2] = strings.TrimRight(xyc[2], "\r\n")
 
 		if len(xyc[2]) != 7 {
-			conn.Write([]byte("Value size missmatch."))
-			return
+			return "Value size missmatch."
 		}
 
-		// set 3. value to display matrix
 		matrix[xInt-1][yInt-1] = xyc[2][1:7]
 		//              log.Println("SP from " + xyc[0] + "x" + xyc[1] + " to " + xyc[2] + " from " + conn.RemoteAddr().String())
 
-		conn.Write([]byte("OK\n"))
+		return "PX" + xyc[0] + " " + xyc[1] + " " + xyc[2]
 
-		return
+	// case "GP":
+	// 	// Get Pixel
+	// 	if len(Command) < 5 {
+	// 		return
+	// 	}
+	// 	ARG := Command[3:]
+	// 	xy := strings.Split(ARG, " ")
 
-	case "GP":
-		// Get Pixel
-		if len(Command) < 5 {
-			return
-		}
-		ARG := Command[3:]
-		xy := strings.Split(ARG, " ")
+	// 	if len(xy) < 2 {
+	// 		return "Too few arguments."
+	// 	}
 
-		if len(xy) < 2 {
-			conn.Write([]byte("Too few arguments."))
-			return
-		}
+	// 	// convert x to int
+	// 	xInt, err := strconv.Atoi(xy[0])
 
-		// convert x to int
-		xInt, err := strconv.Atoi(xy[0])
+	// 	if err != nil {
 
-		if err != nil {
-			conn.Write([]byte("Error in X."))
-			return
-		}
+	// 		return "Error in X."
+	// 	}
 
-		if xInt > display_x {
-			conn.Write([]byte("X to big."))
-			return
-		}
+	// 	if xInt > display_x {
+	// 		conn.Write([]byte("X to big."))
+	// 		return
+	// 	}
 
-		if xInt == 0 {
-			conn.Write([]byte("X to small."))
-			return
-		}
+	// 	if xInt == 0 {
+	// 		conn.Write([]byte("X to small."))
+	// 		return
+	// 	}
 
-		xy[1] = strings.TrimRight(xy[1], "\r\n")
-		// convert y to int
-		yInt, err := strconv.Atoi(xy[1])
+	// 	xy[1] = strings.TrimRight(xy[1], "\r\n")
+	// 	// convert y to int
+	// 	yInt, err := strconv.Atoi(xy[1])
 
-		if err != nil {
-			e := fmt.Errorf("%v", err)
-			conn.Write([]byte("Error in Y." + string(e.Error())))
-			return
-		}
+	// 	if err != nil {
+	// 		e := fmt.Errorf("%v", err)
+	// 		conn.Write([]byte("Error in Y." + string(e.Error())))
+	// 		return
+	// 	}
 
-		if yInt > display_y {
-			conn.Write([]byte("Y to big."))
-			return
-		}
+	// 	if yInt > display_y {
+	// 		conn.Write([]byte("Y to big."))
+	// 		return
+	// 	}
 
-		if yInt == 0 {
-			conn.Write([]byte("Y to small."))
-			return
-		}
+	// 	if yInt == 0 {
+	// 		conn.Write([]byte("Y to small."))
+	// 		return
+	// 	}
 
-		conn.Write([]byte("#" + matrix[xInt-1][yInt-1] + "\r\n"))
+	// 	conn.Write([]byte("#" + matrix[xInt-1][yInt-1] + "\r\n"))
 
-		return
-		//log.Print("GP from " + conn.RemoteAddr().String())
+	// 	return
+	// 	//log.Print("GP from " + conn.RemoteAddr().String())
+
 	case "GM":
 		// Get Matrix
+		m := ""
 		for j := 0; j < display_y; j++ {
 			for i := 0; i < display_x; i++ {
-				conn.Write([]byte(matrix[i][j]))
+				m = m + matrix[i][j]
 			}
 		}
-
-		conn.Write([]byte("\r\n"))
-		//log.Println("GM from " + conn.RemoteAddr().String())
-		return
+		return m
 
 	default:
 		if []byte(CMD)[0] > 0 {
-			conn.Write([]byte("unkown command \n"))
+			return "unkown command"
 		}
-		//log.Println([]byte(CMD))
-		return
+
 	}
 
-	// Print response message, stripping newline character.
-	// log.Println("Client message:", string(buffer[:len(buffer)-1]))
-
-	// Send response message to the client.
+	return ""
 
 }
