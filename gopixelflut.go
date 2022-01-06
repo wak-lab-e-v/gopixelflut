@@ -25,8 +25,7 @@ const (
 )
 
 /* global variable declaration */
-var matrix [display_x][display_y]string
-var matrix_rgb [display_x][display_y][3]byte
+var matrix_rgb [display_x][display_y][3]int64
 
 func main() {
 
@@ -35,8 +34,6 @@ func main() {
 
 	for i := 0; i < display_x; i++ {
 		for j := 0; j < display_y; j++ {
-
-			matrix[i][j] = "000000"
 
 			matrix_rgb[i][j][0] = 0
 			matrix_rgb[i][j][1] = 0
@@ -78,6 +75,7 @@ func handleConnection(conn net.Conn) {
 
 	bufOne := make([]byte, 1)
 	command := ""
+	var cmd []byte
 
 	// conn.SetReadDeadline(5) // read timeout
 
@@ -87,7 +85,9 @@ func handleConnection(conn net.Conn) {
 		n, err := conn.Read(bufOne)
 
 		if err != nil {
-			// errors.Is()
+			fmt.Errorf("Error: %v", err)
+			conn.Write([]byte(err.Error() + "\r\n"))
+			// if errors.Is(err, ...) { }
 			// possible reason: read timeout
 			log.Println("error in connection - closed")
 			conn.Close()
@@ -99,159 +99,127 @@ func handleConnection(conn net.Conn) {
 
 			ch := int(bufOne[0])
 
-			if ch == 10 { // ende vom eingehenden command
+			if ch == 10 { // end incomming command
 				resultString := handleCommand(command, conn)
 				conn.Write([]byte(resultString + "\r\n"))
 				command = ""
+
 			} else {
 				command = command + string(bufOne)
+				cmd = cmd + bufOne
 			}
-		} else {
-			log.Println("conn read (n) has 0 bytes")
 		}
-
 	}
 }
 
 func handleCommand(Command string, conn net.Conn) string {
 
-	if len(Command) < 2 {
-		return "cmd len to small"
-	}
+	if Command[0:2] == "PX" { // SET or GET Pixel
 
-	CMD := Command[0:2]
+		ARG := strings.Split(Command[3:], " ")
 
-	switch CMD {
-	case "PX":
-		if len(Command) < 5 {
-			return "wrong cmd len"
-		}
-		ARG := Command[3:]
-		xyc := strings.Split(ARG, " ")
-		if len(xyc) < 3 {
-			return "Too few arguments."
-		}
+		// PX X Y #000000 (ASCI-hex encoded RGB value), ARG len = 3
+		// PX X Y 0 0 0  (ASCI-int based RGB value) , ARG len = 5
+		// ARG[0] = X
+		// ARG[1] = Y
+		// ARG[2] = #00000 or 0
+		// ARG[3] = 0
+		// ARG[4] = 0
+
 		if debug == true {
-			log.Println("DEBUG: Full IN: ", xyc)
-			log.Println("DEBUG: SP Data X: ", xyc[0])
-			log.Println("DEBUG: SP Data Y: ", xyc[1])
-			log.Println("DEBUG: SP Data C: ", xyc[2])
+			log.Println("DEBUG: Full IN: ", ARG)
 		}
+
+		//
+		// Start with check of incomming X/Y
+		//
+
 		// convert x to int
-		xInt, err := strconv.Atoi(xyc[0])
-
+		xInt, err := strconv.Atoi(ARG[0])
 		if err != nil {
-			return "Error in X."
+			return "Error in X. Use 'HELP'"
 		}
-
 		if xInt > display_x {
-			return "X to big."
+			return "X to big. Use 'INFO'."
 		}
-
 		if xInt == 0 {
-			return "X to small."
+			return "X to small. Use 'INFO'."
 		}
 
 		// convert y to int
-		yInt, err := strconv.Atoi(xyc[1])
-
+		yInt, err := strconv.Atoi(ARG[1])
 		if err != nil {
-			return "Error in Y."
+			return "Error in Y. Use 'HELP'"
 		}
-
 		if yInt > display_y {
-			return "Y to big."
+			return "Y to big. Use 'INFO'"
+		}
+		if yInt == 0 {
+			return "Y to small. Use 'INFO'"
 		}
 
-		if yInt == 0 {
-			return "Y to small."
+		//
+		// Start selecting SET / GET Modes
+		//
+		if len(ARG) == 5 { // MODE: SET PIXEL COLOR by 0 0 0 - 255 255 255
+			r, err := strconv.Atoi(ARG[2])
+			g, err := strconv.Atoi(ARG[3])
+			b, err := strconv.Atoi(ARG[4])
+			matrix_rgb[xInt-1][yInt-1][0] = int64(r)
+			matrix_rgb[xInt-1][yInt-1][1] = int64(g)
+			matrix_rgb[xInt-1][yInt-1][2] = int64(b)
+			return Command
 		}
+
+		if len(ARG) == 3 { // MODE: SET PIXEL COLOR by #000000 - #FFFFFF
+			r, err := strconv.ParseInt(ARG[2][0:2], 16, 64) // hex to int64
+			g, err := strconv.ParseInt(ARG[2][3:2], 16, 64)
+			b, err := strconv.ParseInt(ARG[2][5:2], 16, 64)
+
+			matrix_rgb[xInt-1][yInt-1][0] = r
+			matrix_rgb[xInt-1][yInt-1][1] = g
+			matrix_rgb[xInt-1][yInt-1][2] = b
+			return Command
+		}
+
+		if len(ARG) == 2 { // MODE: GET PIXEL COLOR
+			return "PX X Y " + string(matrix_rgb[xInt-1][yInt-1][0])
+		}
+
+		return "Count of arguments not valid. Use 'HELP'"
 
 		xyc[2] = strings.TrimRight(xyc[2], "\r\n")
 
-		if len(xyc[2]) != 7 {
-			return "Value size missmatch."
-		}
-
-		matrix[xInt-1][yInt-1] = xyc[2][1:7]
 		//              log.Println("SP from " + xyc[0] + "x" + xyc[1] + " to " + xyc[2] + " from " + conn.RemoteAddr().String())
-
-		return "PX" + xyc[0] + " " + xyc[1] + " " + xyc[2]
-
-	// case "GP":
-	// 	// Get Pixel
-	// 	if len(Command) < 5 {
-	// 		return
-	// 	}
-	// 	ARG := Command[3:]
-	// 	xy := strings.Split(ARG, " ")
-
-	// 	if len(xy) < 2 {
-	// 		return "Too few arguments."
-	// 	}
-
-	// 	// convert x to int
-	// 	xInt, err := strconv.Atoi(xy[0])
-
-	// 	if err != nil {
-
-	// 		return "Error in X."
-	// 	}
-
-	// 	if xInt > display_x {
-	// 		conn.Write([]byte("X to big."))
-	// 		return
-	// 	}
-
-	// 	if xInt == 0 {
-	// 		conn.Write([]byte("X to small."))
-	// 		return
-	// 	}
-
-	// 	xy[1] = strings.TrimRight(xy[1], "\r\n")
-	// 	// convert y to int
-	// 	yInt, err := strconv.Atoi(xy[1])
-
-	// 	if err != nil {
-	// 		e := fmt.Errorf("%v", err)
-	// 		conn.Write([]byte("Error in Y." + string(e.Error())))
-	// 		return
-	// 	}
-
-	// 	if yInt > display_y {
-	// 		conn.Write([]byte("Y to big."))
-	// 		return
-	// 	}
-
-	// 	if yInt == 0 {
-	// 		conn.Write([]byte("Y to small."))
-	// 		return
-	// 	}
-
-	// 	conn.Write([]byte("#" + matrix[xInt-1][yInt-1] + "\r\n"))
-
-	// 	return
-	// 	//log.Print("GP from " + conn.RemoteAddr().String())
-
-	case "GM":
-		// Get Matrix
-
-		m := ""
-		for j := 0; j < display_y; j++ {
-			for i := 0; i < display_x; i++ {
-				m = m + matrix[i][j]
-			}
-		}
-		log.Print("GM from " + conn.RemoteAddr().String() + " Len " + string(len(m)))
-		return m
-
-	default:
-		if []byte(CMD)[0] > 0 {
-			return "unkown command"
-		}
 
 	}
 
-	return ""
+	if Command[0:2] == "GM" { // Get full pixelmatrix
+		m := ""
+		c := ""
+		for j := 0; j < display_y; j++ {
+			for i := 0; i < display_x; i++ {
+				c = strconv.FormatInt(matrix_rgb[i][j][0], 16)
+				//+matrix[i][j][3]+matrix[i][j][3]
+				m = m + c
+			}
+		}
+		if debug == true {
+			log.Print("GM from " + conn.RemoteAddr().String() + " Len " + string(len(m)))
+		}
+		return m
+	}
+
+	if Command[0:4] == "HELP" { // Small HELP
+		return "PixelServer in GO by WAK-Lab."
+	}
+
+	if Command[0:4] == "INFO" { // Some Infos
+		info := "Matrix Size: \n"
+		info = info + "Run since: "
+		return info
+	}
+
+	return "unkown command"
 
 }
