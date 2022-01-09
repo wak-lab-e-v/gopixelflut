@@ -5,7 +5,9 @@ package main
 
 import (
 	//	"bufio"
+	"errors"
 	"fmt"
+	"io"
 	"log"
 	"net"
 	"os"
@@ -88,14 +90,12 @@ func handleConnection(conn net.Conn) {
 		n, err := conn.Read(bufOne)
 
 		if err != nil {
+			if errors.Is(err, io.EOF) {
+				continue
+			}
 			fmt.Errorf("Error: %v", err)
 			conn.Write([]byte(err.Error() + "\r\n"))
-			log.Println("error in connection" + err.Error())
 			conn.Close()
-
-			// if errors.Is(err, ...) { }
-			// possible reason: read timeout
-
 			return
 		}
 
