@@ -239,20 +239,24 @@ func handleCommand(Command string, conn net.Conn) string {
 	}
 
 	if Command[0:2] == "GM" { // Get full pixelmatrix
-		m := ""
+
+		var m []byte
 
 		for j := 0; j < display_y; j++ {
 			for i := 0; i < display_x; i++ {
-				r := strconv.FormatInt(matrix_rgb[i][j][0], 16)
-				g := strconv.FormatInt(matrix_rgb[i][j][1], 16)
-				b := strconv.FormatInt(matrix_rgb[i][j][2], 16)
-				m = m + r + g + b
+				//r := strconv.FormatInt(matrix_rgb[i][j][0], 16)
+				//g := strconv.FormatInt(matrix_rgb[i][j][1], 16)
+				//b := strconv.FormatInt(matrix_rgb[i][j][2], 16)
+				m = append(m, byte(matrix_rgb[i][j][0]))
+				m = append(m, byte(matrix_rgb[i][j][1]))
+				m = append(m, byte(matrix_rgb[i][j][2]))
 			}
 		}
+		conn.Write(m)
 		if debug == true {
 			log.Print("GM from " + conn.RemoteAddr().String())
 		}
-		return m
+		return ""
 	}
 
 	if Command[0:2] == "GP" {
