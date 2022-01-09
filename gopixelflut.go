@@ -69,6 +69,7 @@ func main() {
 
 		// Handle connections concurrently in a new goroutine.
 		go handleConnection(c)
+
 	}
 }
 
@@ -88,13 +89,13 @@ func handleConnection(conn net.Conn) {
 
 		if err != nil {
 			if errors.Is(err, io.EOF) {
-
 				continue
+			} else {
+				fmt.Errorf("Error: %v", err)
+				conn.Write([]byte(err.Error() + "\r\n"))
+				conn.Close()
+				return
 			}
-			fmt.Errorf("Error: %v", err)
-			conn.Write([]byte(err.Error() + "\r\n"))
-			conn.Close()
-			return
 		}
 
 		if n > 0 {
