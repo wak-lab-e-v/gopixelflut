@@ -78,6 +78,8 @@ func handleConnection(conn net.Conn) {
 
 	bufOne := make([]byte, 1)
 	command := ""
+	connTimeOut := 0
+
 	// var cmd []byte
 
 	// conn.SetReadDeadline(5) // read timeout
@@ -89,7 +91,16 @@ func handleConnection(conn net.Conn) {
 
 		if err != nil {
 			if errors.Is(err, io.EOF) {
+				time.Sleep(50 * time.Microsecond)
+				connTimeOut++
+				if connTimeOut > 1000 {
+					fmt.Errorf("Timeout - Conn closed")
+					conn.Write([]byte("Timeout - Conn closed"))
+					conn.Close()
+					return
+				}
 				continue
+
 			} else {
 				fmt.Errorf("Error: %v", err)
 				conn.Write([]byte(err.Error() + "\r\n"))
