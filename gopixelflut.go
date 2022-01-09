@@ -23,7 +23,7 @@ const (
 	connType  = "tcp"
 	display_x = 60
 	display_y = 33
-	debug     = true
+	debug     = false
 )
 
 /* global variable declaration */
