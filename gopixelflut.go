@@ -90,10 +90,11 @@ func handleConnection(conn net.Conn) {
 		if err != nil {
 			fmt.Errorf("Error: %v", err)
 			conn.Write([]byte(err.Error() + "\r\n"))
+			log.Println("error in connection" + err.Error())
+			conn.Close()
+
 			// if errors.Is(err, ...) { }
 			// possible reason: read timeout
-			log.Println("error in connection - closed")
-			conn.Close()
 
 			return
 		}
