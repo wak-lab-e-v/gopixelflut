@@ -65,9 +65,6 @@ func main() {
 			return
 		}
 
-		fmt.Println("Client connected.")
-
-		// Print client connection address.
 		fmt.Println("Client " + c.RemoteAddr().String() + " connected.")
 
 		// Handle connections concurrently in a new goroutine.
@@ -80,7 +77,7 @@ func handleConnection(conn net.Conn) {
 
 	bufOne := make([]byte, 1)
 	command := ""
-	var cmd []byte
+	// var cmd []byte
 
 	// conn.SetReadDeadline(5) // read timeout
 
@@ -91,6 +88,7 @@ func handleConnection(conn net.Conn) {
 
 		if err != nil {
 			if errors.Is(err, io.EOF) {
+
 				continue
 			}
 			fmt.Errorf("Error: %v", err)
@@ -110,7 +108,7 @@ func handleConnection(conn net.Conn) {
 
 			} else {
 				command = command + string(bufOne)
-				cmd = append(cmd, bufOne[0])
+				//cmd = append(cmd, bufOne[0])
 			}
 		}
 	}
