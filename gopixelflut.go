@@ -48,7 +48,7 @@ func main() {
 	serverStartTime = time.Now()
 
 	// init display
-	fmt.Println("PixlServer - init display with %v x %v\n", display_x, display_y)
+	fmt.Printf("PixelServer - init display with %v x %v\n", display_x, display_y)
 
 	for i := 0; i < display_x; i++ {
 		for j := 0; j < display_y; j++ {
