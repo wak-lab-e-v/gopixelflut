@@ -231,8 +231,8 @@ func handleCommand(Command string, conn net.Conn) string {
 				log.Println("ARG 1 = Y = " + ARG[1])
 				log.Println("ARG 2 = C = " + ARG[2])
 			}
-
-			if len(ARG[2]) != 8 {
+			// ARG[2] = strings.TrimRight(ARG[2], "\r\n")
+			if len(ARG[2]) <= 8 {
 				return "Error in color syntax. Use 'HELP'"
 			}
 
@@ -257,9 +257,6 @@ func handleCommand(Command string, conn net.Conn) string {
 
 		for j := 0; j < display_y; j++ {
 			for i := 0; i < display_x; i++ {
-				//r := strconv.FormatInt(matrix_rgb[i][j][0], 16)
-				//g := strconv.FormatInt(matrix_rgb[i][j][1], 16)
-				//b := strconv.FormatInt(matrix_rgb[i][j][2], 16)
 				m = append(m, byte(matrix_rgb[i][j][0]))
 				m = append(m, byte(matrix_rgb[i][j][1]))
 				m = append(m, byte(matrix_rgb[i][j][2]))
@@ -326,6 +323,17 @@ func handleCommand(Command string, conn net.Conn) string {
 		info = info + "RUNTIME: " + diff.String() + "\n"
 
 		return info
+	}
+
+	if Command[0:4] == "SIZE" {
+		infoX := strconv.Itoa(display_x)
+		infoY := strconv.Itoa(display_y)
+		return "SIZE: " + infoX + "x" + infoY + "\r\n"
+	}
+
+	if Command[0:4] == "EXIT" { // Exit connection in
+		conn.Close()
+		return ""
 	}
 
 	return "Unkown command. Use 'HELP' and 'INFO'"
