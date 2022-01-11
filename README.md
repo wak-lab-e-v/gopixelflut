@@ -1,4 +1,4 @@
-Pixelflut: Multiplayer canvas
+Pixelflut: Multiplayer canvas for LED Boards
 ===============================
 #### Pixelflut Socket server in GoLang.
 
