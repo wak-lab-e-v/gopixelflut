@@ -21,16 +21,24 @@ const (
 	connHost  = "0.0.0.0"
 	connPort  = "1337"
 	connType  = "tcp"
-	display_x = 60
 	display_y = 33
-	debug     = false
+	display_x = 60
 )
 
 /* global variable declaration */
-var matrix_rgb [display_x][display_y][3]int64
+
 var serverStartTime time.Time
+var debug bool = false
+var matrix_rgb [display_x][display_y][3]int64
 
 func main() {
+
+	for _, arg := range os.Args[1:] {
+		if arg == "debug" {
+			debug = true
+			fmt.Printf("DEBUG activated!\n")
+		}
+	}
 
 	serverStartTime = time.Now()
 
@@ -128,11 +136,20 @@ func handleConnection(conn net.Conn) {
 
 func handleCommand(Command string, conn net.Conn) string {
 
+	if debug {
+		log.Println("DEBUG: "+conn.RemoteAddr().String()+" command len: ", len(Command))
+		log.Println("DEBUG: "+conn.RemoteAddr().String()+" Full command: ", Command)
+	}
+
 	if len(Command) < 2 {
 		return "Unkown command. Use 'HELP' and 'INFO'"
 	}
 
 	if Command[0:2] == "PX" { // SET or GET Pixel
+
+		if debug {
+			log.Println("PX")
+		}
 
 		ARG := strings.Split(Command[3:], " ")
 
@@ -143,10 +160,6 @@ func handleCommand(Command string, conn net.Conn) string {
 		// ARG[2] = #00000 or 0
 		// ARG[3] = 0
 		// ARG[4] = 0
-
-		if debug {
-			log.Println("DEBUG: Full command: ", Command)
-		}
 
 		//
 		// Start with check of incomming X/Y
@@ -294,6 +307,10 @@ func handleCommand(Command string, conn net.Conn) string {
 		println(g)
 		println(b)
 		return "PX " + ARG[0] + " " + ARG[1] + " " + r + " " + g + " " + b
+	}
+
+	if len(Command) < 4 {
+		return "Unkown command. Use 'HELP' and 'INFO'"
 	}
 
 	if Command[0:4] == "HELP" { // Small HELP
