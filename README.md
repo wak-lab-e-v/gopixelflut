@@ -10,7 +10,7 @@ Pixelflut defines four main commands that are always supported to get you starte
 * `HELP`: Returns a short introductional help text.
 * `INFO`: Returns some informations and statistics. 
 * `SIZE`: Returns the size of the visible canvas in pixel as `SIZE <w> <h>`.
-* `GP <x> <y>`: Return the current color of a pixel as `PX <x> <y> #<rrggbb>`. 
+* `GP <x> <y>`: Return the current color of a pixel as `PX <x> <y> <r> <g> <b>`. 
 * `GM`: Return the the full matrix as binary stream. Row oriented. Start with Y1.
 * `PX <x> <y> #<rrggbb>`: Draw a single pixel at position (x, y) with the specified hex color code.
 * `PX <x> <y> 255 255 255`: Draw a single pixel at position (x, y) with the specified color values (R G B).
@@ -22,9 +22,10 @@ Example:
 
     $ echo "SIZE" | netcat pixelflut.example.com 1337
     SIZE 800 600
-    $ echo "PX 23 42 #ff8000" | netcat pixelflut.example.com 1337
-    $ echo "GP 32 42" | netcat pixelflut.example.com 1337
-    PX 23 42 #ff8000
+    $ echo "PX 10 10 #ff8000" | netcat pixelflut.example.com 1337
+    $ echo "PX 20 20 255 50 0 | netcat pixelflut.example.com 1337
+	$ echo "GP 20 20" | netcat pixelflut.example.com 1337
+    PX 20 20 255 50 0
 
 
 ## License
