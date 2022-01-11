@@ -8,9 +8,10 @@ Pixelflut Protocol
 Pixelflut defines four main commands that are always supported to get you started:
 
 * `HELP`: Returns a short introductional help text.
-* `INFO`: Returns size and some other statistics. 
+* `INFO`: Returns some informations and statistics. 
 * `SIZE`: Returns the size of the visible canvas in pixel as `SIZE <w> <h>`.
-* `GP <x> <y>` Return the current color of a pixel as `PX <x> <y> #<rrggbb>`. 
+* `GP <x> <y>`: Return the current color of a pixel as `PX <x> <y> #<rrggbb>`. 
+* `GM`: Return the the full matrix as binary stream. Row oriented. Start with Y1.
 * `PX <x> <y> #<rrggbb>`: Draw a single pixel at position (x, y) with the specified hex color code.
 * `PX <x> <y> 255 255 255`: Draw a single pixel at position (x, y) with the specified color values (R G B).
 
