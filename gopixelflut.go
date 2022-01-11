@@ -232,7 +232,7 @@ func handleCommand(Command string, conn net.Conn) string {
 				log.Println("ARG 2 = C = " + ARG[2])
 			}
 			// ARG[2] = strings.TrimRight(ARG[2], "\r\n")
-			if len(ARG[2]) <= 8 {
+			if len(ARG[2]) < 7 {
 				return "Error in color syntax. Use 'HELP'"
 			}
 
@@ -243,6 +243,10 @@ func handleCommand(Command string, conn net.Conn) string {
 			matrix_rgb[xInt-1][yInt-1][0] = r
 			matrix_rgb[xInt-1][yInt-1][1] = g
 			matrix_rgb[xInt-1][yInt-1][2] = b
+
+			println(r)
+			println(g)
+			println(b)
 
 			return Command
 		}
