@@ -35,6 +35,34 @@ var activeConnCount uint64 = 0
 var commandCount uint64 = 0
 var errorCount uint64 = 0
 
+int hell = 0
+int dunkel = 0
+
+func pong(left int, right int) int{
+	if left>0 {
+		left = 1
+	}	else {
+		if left <0 {
+			left = -1
+		} else {
+			left = 0
+		}
+	}
+	if right>0 {
+		right = 1
+	}	else {
+		if right <0 {
+			right = -1
+		} else {
+			right = 0
+		}
+	}
+	var ret[]
+	ret=pong_pixel_array(left,right)
+
+	return 0;
+}
+
 func main() {
 
 	for _, arg := range os.Args[1:] {
@@ -82,6 +110,9 @@ func main() {
 
 		// Handle connections concurrently in a new goroutine.
 		go handleConnection(c)
+
+		// refreshing the pong field in a new goroutine
+		go pong(dunkel,hell)
 
 	}
 }
@@ -319,9 +350,34 @@ func handleCommand(Command string, conn net.Conn) string {
 		return "PX " + ARG[0] + " " + ARG[1] + " " + r + " " + g + " " + b
 	}
 
+	
+
 	if len(Command) < 4 {
 		errorCount++
 		return "Unkown command. Use 'HELP' and 'INFO'"
+	}
+
+	if Command[0:2] == "LI" {
+		string argument = Command[3]
+		if argument == "-1" {
+			dunkel++
+		} else {
+			if argument == "1" {
+				dunkel--
+			}
+		}
+		return ""
+	}
+	if Command[0:2] == "RE" {
+		string argument = Command[3]
+		if argument == "-1" {
+			hell++
+		} else {
+			if argument == "1" {
+				hell--
+			}
+		}
+		return ""
 	}
 
 	if Command[0:4] == "HELP" { // Small HELP
